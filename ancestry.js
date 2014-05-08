@@ -1,8 +1,12 @@
-var individuals = 25,
+var width = 600,
+    height = 400,
+    individuals = 25,
 	generations = 20, 
-	width = 600,
-    height = 400;
-    
+	saturation = 0.3,
+	lightness = 0.6,
+	highlightedSaturation = 0.95,
+	highlightedLightness = 0.4;
+
 var xRadius = Math.floor(0.25 * width/individuals),
 	yRadius = Math.floor(0.25 * height/generations),
 	radius = Math.min(xRadius, yRadius);
@@ -27,7 +31,7 @@ var nodes = [];
 for (var i = 0; i < individuals; i += 1) {
 	for (var j = 0; j < generations; j += 1) {
 		nodes.push(
-			{'name': i.toString() + "-" + j.toString(), 'coord': i, 'gen': j}
+			{"name": i.toString() + "-" + j.toString(), "coord": i, "gen": j, "hue": 200}
 		);
 	}
 }
@@ -42,7 +46,13 @@ for (var j = 0; j < generations - 1; j += 1) {
 		var pGen = j;
 		var c = cCoord.toString() + "-" + cGen.toString();
 		var p = pCoord.toString() + "-" + pGen.toString();
-		links.push({'parent': p, 'child': c, 'cCoord': cCoord, 'pCoord': pCoord, 'cGen': cGen, 'pGen': pGen});
+		var hue;
+		nodes.map( function (f) { 
+			if (f.name == p) { 
+				hue = f.hue;
+			}
+		});
+		links.push({"parent": p, "child": c, "cCoord": cCoord, "pCoord": pCoord, "cGen": cGen, "pGen": pGen, "hue": hue});
 	});
 }
 
@@ -71,8 +81,8 @@ function getRelated(name) {
     return n;
 }
 
-var individuals = d3.max(nodes, accessor('coord')),
-	generations = d3.max(nodes, accessor('gen'));
+var individuals = d3.max(nodes, accessor("coord")),
+	generations = d3.max(nodes, accessor("gen"));
 
 var x = d3.scale.linear()
     .domain([0, individuals])
@@ -89,32 +99,30 @@ var plot = d3.select(".plot")
 var lines = plot.selectAll("line")
 	.data(links)
 	.enter().append("line")
-  	.style("stroke", "gray")
+  	.style("stroke", function(d) { return d3.hsl(d.hue, saturation-0.2, lightness); })
 	.attr("x1", function(d) { return x(d.pCoord); })
 	.attr("y1", function(d) { return y(d.pGen); })
 	.attr("x2", function(d) { return x(d.cCoord); })
 	.attr("y2", function(d) { return y(d.cGen); });	
 
-var target, related;
-
 var points = plot.selectAll("circle")
     .data(nodes)
   	.enter().append("circle")
-  	.style("fill", "steelblue")
+  	.style("fill", function(d) { return d3.hsl(d.hue, saturation, lightness); })
     .attr("cx", function(d) { return x(d.coord); })
     .attr("cy", function(d) { return y(d.gen); })
     .attr("r", radius)
     .on("mouseover", function() { 
     	target = d3.select(d3.event.target);
-    	related = getRelated(target.datum().name);
+    	highlight = getRelated(target.datum().name);
     	plot.selectAll("circle").filter( function(d,i) { 
-    		return related.some( function(f) { return f == d.name }); 
-    	}).style("fill", "red");
+    		return highlight.some( function(f) { return f == d.name }); 
+    	}).style("fill", function(d) { return d3.hsl(d.hue, highlightedSaturation, highlightedLightness); });
     	plot.selectAll("line").filter( function(d,i) { 
-    		return related.some( function(f) { return f == d.child }); 
-    	}).style("stroke", "red");
+    		return highlight.some( function(f) { return f == d.child }); 
+    	}).style("stroke", function(d) { return d3.hsl(d.hue, highlightedSaturation-0.2, highlightedLightness); });
     })
 	.on("mouseout", function() { 
-		plot.selectAll("circle").style("fill", "steelblue");
-		plot.selectAll("line").style("stroke", "gray"); 
+		plot.selectAll("circle").style("fill", function(d) { return d3.hsl(d.hue, saturation, lightness); });
+		plot.selectAll("line").style("stroke", function(d) { return d3.hsl(d.hue, saturation-0.2, lightness); }); 
 	});
