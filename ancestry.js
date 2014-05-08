@@ -1,8 +1,11 @@
-var individuals = 30,
-	generations = 25, 
+var individuals = 25,
+	generations = 20, 
 	width = 600,
-    height = 400,
-    radius = 5;	
+    height = 400;
+    
+var xRadius = Math.floor(0.25 * width/individuals),
+	yRadius = Math.floor(0.25 * height/generations),
+	radius = Math.min(xRadius, yRadius);
 
 function accessor(key) {
     return function (o) {
