@@ -4,8 +4,9 @@ var width = 600,
 	generations = 20, 
 	saturation = 0.3,
 	lightness = 0.6,
-	highlightedSaturation = 0.95,
-	highlightedLightness = 0.4;
+	highlightedSaturation = 0.85,
+	highlightedLightness = 0.4,
+	mutationRate = 0.1;
 
 var xRadius = Math.floor(0.25 * width/individuals),
 	yRadius = Math.floor(0.25 * height/generations),
@@ -44,15 +45,25 @@ for (var j = 0; j < generations - 1; j += 1) {
 		var pCoord = d[1];
 		var cGen = j+1;
 		var pGen = j;
-		var c = cCoord.toString() + "-" + cGen.toString();
-		var p = pCoord.toString() + "-" + pGen.toString();
-		var hue;
+		var cName = cCoord.toString() + "-" + cGen.toString();
+		var pName = pCoord.toString() + "-" + pGen.toString();
+		var pNode, cNode;
 		nodes.map( function (f) { 
-			if (f.name == p) { 
-				hue = f.hue;
+			if (f.name == pName) { 
+				pNode = f;
 			}
+			if (f.name == cName) { 
+				cNode = f;
+			}	
 		});
-		links.push({"parent": p, "child": c, "cCoord": cCoord, "pCoord": pCoord, "cGen": cGen, "pGen": pGen, "hue": hue});
+		// inheritance
+		cNode.hue = pNode.hue;
+		// mutation
+		if (Math.random() < mutationRate) {
+			h = Math.random() * 360;
+			cNode.hue = h;
+		}
+		links.push({"parent": pName, "child": cName, "cCoord": cCoord, "pCoord": pCoord, "cGen": cGen, "pGen": pGen, "hue": pNode.hue});
 	});
 }
 
