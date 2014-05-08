@@ -5,7 +5,7 @@ var width = 600,
 	saturation = 0.3,
 	lightness = 0.6,
 	highlightedSaturation = 0.85,
-	highlightedLightness = 0.4,
+	highlightedLightness = 0.40,
 	mutationRate = 0.1;
 
 var xRadius = Math.floor(0.25 * width/individuals),
