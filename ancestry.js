@@ -76,11 +76,11 @@ var individuals = d3.max(nodes, accessor('coord')),
 
 var x = d3.scale.linear()
     .domain([0, individuals])
-    .range([radius, width-radius]);
+    .range([radius + 1, width - radius - 1]);
     
 var y = d3.scale.linear()
     .domain([0, generations])
-    .range([radius, height-radius]);    
+    .range([radius + 1, height - radius - 1]);    
 
 var plot = d3.select(".plot")
     .attr("width", width)
@@ -89,6 +89,7 @@ var plot = d3.select(".plot")
 var lines = plot.selectAll("line")
 	.data(links)
 	.enter().append("line")
+  	.style("stroke", "gray")
 	.attr("x1", function(d) { return x(d.pCoord); })
 	.attr("y1", function(d) { return y(d.pGen); })
 	.attr("x2", function(d) { return x(d.cCoord); })
@@ -99,6 +100,7 @@ var target, related;
 var points = plot.selectAll("circle")
     .data(nodes)
   	.enter().append("circle")
+  	.style("fill", "steelblue")
     .attr("cx", function(d) { return x(d.coord); })
     .attr("cy", function(d) { return y(d.gen); })
     .attr("r", radius)
@@ -108,5 +110,11 @@ var points = plot.selectAll("circle")
     	plot.selectAll("circle").filter( function(d,i) { 
     		return related.some( function(f) { return f == d.name }); 
     	}).style("fill", "red");
+    	plot.selectAll("line").filter( function(d,i) { 
+    		return related.some( function(f) { return f == d.child }); 
+    	}).style("stroke", "red");
     })
-	.on("mouseout", function() { plot.selectAll("circle").style("fill", "steelblue"); });
+	.on("mouseout", function() { 
+		plot.selectAll("circle").style("fill", "steelblue");
+		plot.selectAll("line").style("stroke", "gray"); 
+	});
